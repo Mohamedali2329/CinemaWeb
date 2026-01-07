@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CinemaWeb - Plateforme de Streaming</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);background-attachment:fixed;color:#fff;overflow-x:hidden}
+.header{background:linear-gradient(180deg,rgba(15,12,41,0.95) 0%,transparent 100%);position:fixed;top:0;width:100%;z-index:100;padding:20px 50px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(15px);transition:background 0.3s;border-bottom:1px solid rgba(124,58,237,0.2)}
+.header.scrolled{background:rgba(15,12,41,0.98)}
+.logo{font-size:32px;font-weight:900;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:0 0 30px rgba(102,126,234,0.5);letter-spacing:-1px}
+.nav{display:flex;gap:25px;align-items:center}
+.nav a{color:#e0e0e0;text-decoration:none;cursor:pointer;padding:8px 12px;transition:all 0.3s;border-radius:4px;font-size:15px;font-weight:500}
+.nav a:hover{color:#fff;background:linear-gradient(135deg,rgba(102,126,234,0.3),rgba(118,75,162,0.3));transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,0.3)}
+.nav a.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+.hero{height:85vh;background:linear-gradient(rgba(15,12,41,0.7),rgba(36,36,62,0.9)),url(https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920) center/cover;display:flex;flex-direction:column;justify-content:center;padding:0 50px;margin-top:70px;position:relative}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:150px;background:linear-gradient(transparent,rgba(15,12,41,1))}
+.hero h1{font-size:56px;margin-bottom:20px;font-weight:900;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:0 0 30px rgba(102,126,234,0.5);animation:fadeInUp 0.8s}
+.hero p{font-size:22px;max-width:650px;margin-bottom:35px;line-height:1.5;text-shadow:2px 2px 4px rgba(0,0,0,0.8);animation:fadeInUp 1s}
+.btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:14px 35px;font-size:17px;cursor:pointer;border-radius:8px;transition:all 0.3s;font-weight:600;box-shadow:0 8px 25px rgba(102,126,234,0.4);text-transform:uppercase;letter-spacing:0.5px}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(102,126,234,0.6)}
+.btn:active{transform:translateY(-1px)}
+.btn-secondary{background:rgba(255,255,255,0.15);margin-left:15px;backdrop-filter:blur(10px);box-shadow:0 4px 15px rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2)}
+.btn-secondary:hover{background:rgba(255,255,255,0.25);transform:translateY(-3px)}
+.section{padding:40px 50px}
+.section h2{margin-bottom:25px;font-size:28px;font-weight:700;position:relative;padding-left:15px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section h2::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:5px;height:28px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:3px;box-shadow:0 0 15px rgba(102,126,234,0.6)}
+.films-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.film-card{cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));box-shadow:0 4px 15px rgba(0,0,0,0.5);border:1px solid rgba(102,126,234,0.2)}
+.film-card:hover{transform:scale(1.08) translateY(-8px);box-shadow:0 12px 45px rgba(102,126,234,0.6);z-index:10;border-color:rgba(102,126,234,0.6)}
+.film-card img{width:100%;height:320px;object-fit:cover;border-radius:12px 12px 0 0;transition:all 0.4s}
+.film-card:hover img{filter:brightness(0.6)}
+.film-info{position:absolute;bottom:0;width:100%;background:linear-gradient(transparent,rgba(15,12,41,0.98));padding:20px;opacity:0;transition:all 0.4s;transform:translateY(20px)}
+.film-card:hover .film-info{opacity:1;transform:translateY(0)}
+.film-info h3{font-size:18px;margin-bottom:8px;font-weight:700;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.film-info p{font-size:13px;color:#bbb;line-height:1.4}
+.search-box{width:100%;max-width:650px;padding:16px 20px;background:rgba(255,255,255,0.1);border:2px solid rgba(102,126,234,0.4);border-radius:50px;color:#fff;font-size:16px;margin-bottom:35px;transition:all 0.3s;backdrop-filter:blur(10px)}
+.search-box:focus{outline:none;border-color:#667eea;background:rgba(255,255,255,0.15);box-shadow:0 0 20px rgba(102,126,234,0.5)}
+.search-box::placeholder{color:#999}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,12,41,0.95);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(15px);animation:fadeIn 0.25s}
+.modal.active{display:flex}
+.login-container{background:linear-gradient(135deg,rgba(102,126,234,0.15) 0%,rgba(118,75,162,0.15) 100%);padding:50px 45px;border-radius:20px;max-width:420px;width:90%;box-shadow:0 25px 80px rgba(0,0,0,0.95);animation:slideUp 0.35s;border:2px solid rgba(102,126,234,0.4);position:relative;overflow:hidden;backdrop-filter:blur(20px)}
+.login-container::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#667eea,#764ba2,#667eea);animation:glow 3s infinite}
+.login-container h2{margin-bottom:30px;font-size:32px;font-weight:800;text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.login-form{display:flex;flex-direction:column;gap:16px}
+.input-group{position:relative}
+.input-group input{width:100%;padding:16px 20px;background:rgba(255,255,255,0.08);border:2px solid rgba(102,126,234,0.3);border-radius:12px;color:#fff;font-size:15px;transition:all 0.3s;outline:none}
+.input-group input:focus{border-color:#667eea;background:rgba(255,255,255,0.12);box-shadow:0 0 15px rgba(102,126,234,0.4)}
+.input-group input::placeholder{color:#888}
+.btn-login{width:100%;padding:16px;font-size:16px;font-weight:700;margin-top:8px;position:relative;overflow:hidden}
+.btn-login::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.2);transform:translate(-50%,-50%);transition:width 0.5s,height 0.5s}
+.btn-login:hover::after{width:300px;height:300px}
+.divider{text-align:center;margin:20px 0;color:#666;font-size:14px;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:rgba(102,126,234,0.3)}
+.divider::before{left:0}
+.divider::after{right:0}
+.btn-register{background:transparent;border:2px solid rgba(102,126,234,0.5);color:#fff}
+.btn-register:hover{background:rgba(102,126,234,0.2);border-color:#667eea}
+.modal-content{background:linear-gradient(135deg,rgba(15,12,41,0.98) 0%,rgba(36,36,62,0.98) 100%);padding:45px;border-radius:20px;max-width:600px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.9);animation:slideUp 0.4s;border:1px solid rgba(102,126,234,0.3);backdrop-filter:blur(20px)}
+.modal-content h2{margin-bottom:25px;font-size:28px;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.close-modal{color:#fff;float:right;font-size:32px;cursor:pointer;line-height:1;transition:all 0.3s;margin-top:-10px}
+.close-modal:hover{color:#667eea;transform:rotate(90deg)}
+.page{display:none;animation:fadeIn 0.5s}
+.page.active{display:block}
+.account-info{background:linear-gradient(135deg,rgba(102,126,234,0.15) 0%,rgba(118,75,162,0.15) 100%);padding:40px;border-radius:15px;max-width:700px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(102,126,234,0.3);backdrop-filter:blur(20px)}
+.account-info h3{margin-bottom:20px;font-size:24px;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.account-info p{margin-bottom:12px;color:#ccc;font-size:16px;display:flex;align-items:center;gap:10px}
+.account-info p strong{color:#fff;min-width:120px}
+.star-rating{color:#ffd700;margin-left:10px;text-shadow:0 0 10px rgba(255,215,0,0.5)}
+.fav-btn{background:transparent;border:2px solid rgba(102,126,234,0.5);color:#fff;padding:10px 18px;cursor:pointer;border-radius:8px;margin-left:12px;font-size:15px;transition:all 0.3s;font-weight:600}
+.fav-btn:hover{background:rgba(102,126,234,0.3);border-color:#667eea;transform:translateY(-2px)}
+.fav-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);border-color:transparent;box-shadow:0 4px 15px rgba(102,126,234,0.6)}
+.download-btn{background:linear-gradient(135deg,#0f9d58 0%,#0b7a44 100%);border:none;color:#fff;padding:10px 18px;cursor:pointer;border-radius:8px;margin-left:12px;font-size:15px;transition:all 0.3s;font-weight:600;box-shadow:0 4px 15px rgba(15,157,88,0.4)}
+.download-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(15,157,88,0.6)}
+.watch-btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;color:#fff;padding:12px 25px;cursor:pointer;border-radius:8px;font-size:16px;transition:all 0.3s;font-weight:700;box-shadow:0 4px 20px rgba(102,126,234,0.6);text-transform:uppercase;letter-spacing:1px}
+.watch-btn:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(102,126,234,0.8)}
+.video-player{width:100%;max-width:900px;margin:20px auto;border-radius:15px;overflow:hidden;box-shadow:0 15px 50px rgba(0,0,0,0.9);border:2px solid rgba(102,126,234,0.3)}
+.video-player video{width:100%;display:block;background:#000}
+.loading{display:none;text-align:center;color:#666;padding:20px;font-size:15px}
+.loading.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:0.5}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div class="logo">CinemaWeb</div>
+<div class="nav">
+<a onclick="showPage('accueil')" class="active">Accueil</a>
+<a onclick="showPage('recherche')">Rechercher</a>
+<a onclick="showPage('favoris')">Mes Favoris</a>
+<a onclick="showPage('compte')">Compte</a>
+<a onclick="logout()">Deconnexion</a>
+</div>
+</div>
+
+<div id="loginModal" class="modal active">
+<div class="login-container">
+<h2>Bienvenue</h2>
+<div class="login-form">
+<div class="input-group">
+<input type="text" id="loginUser" placeholder="Nom d'utilisateur" autocomplete="username">
+</div>
+<div class="input-group">
+<input type="password" id="loginPass" placeholder="Mot de passe" autocomplete="current-password">
+</div>
+<button class="btn btn-login" onclick="login()">Se connecter</button>
+<div class="divider">ou</div>
+<button class="btn btn-register" onclick="register()">Creer un compte</button>
+</div>
+<div class="loading" id="loginLoading">Connexion en cours...</div>
+</div>
+</div>
+
+<div id="accueil" class="page active">
+<div class="hero">
+<h1>Films Illimites</h1>
+<p>Regardez ou vous voulez. Telechargez vos films preferes. Decouvrez des milliers d'histoires passionnantes.</p>
+<div>
+<button class="btn" onclick="showPage('recherche')">Parcourir</button>
+<button class="btn btn-secondary" onclick="showPage('favoris')">Mes Favoris</button>
+</div>
+</div>
+<div class="section">
+<h2>Suggestions pour vous</h2>
+<div id="suggestions" class="films-grid"></div>
+</div>
+<div class="section">
+<h2>Tous les films</h2>
+<div id="allFilms" class="films-grid"></div>
+</div>
+</div>
+
+<div id="recherche" class="page">
+<div class="section" style="margin-top:100px">
+<h2>Rechercher des films</h2>
+<input type="text" class="search-box" id="searchInput" placeholder="Tapez un titre, realisateur ou genre..." oninput="search()">
+<div id="searchResults" class="films-grid"></div>
+</div>
+</div>
+
+<div id="favoris" class="page">
+<div class="section" style="margin-top:100px">
+<h2>Mes films favoris</h2>
+<div id="favorisList" class="films-grid"></div>
+<p id="noFavoris" style="display:none;text-align:center;padding:40px;color:#666;font-size:18px">Aucun film dans vos favoris. Ajoutez-en pour les retrouver ici !</p>
+</div>
+</div>
+
+<div id="compte" class="page">
+<div class="section" style="margin-top:100px">
+<h2>Mon compte</h2>
+<div class="account-info">
+<h3>Informations du compte</h3>
+<p><strong>Utilisateur:</strong> <span id="username" style="color:#e50914"></span></p>
+<p><strong>Favoris:</strong> <span id="favorisCount">0</span> film(s)</p>
+<p><strong>Membre depuis:</strong> Aujourd'hui</p>
+<button class="btn" onclick="logout()" style="margin-top:20px">Se deconnecter</button>
+</div>
+</div>
+</div>
+
+<div id="filmModal" class="modal">
+<div class="modal-content" style="max-width:600px">
+<span class="close-modal" onclick="closeFilmModal()">&times;</span>
+<div id="filmDetails"></div>
+</div>
+</div>
+
+<script>
+let currentUser=null;
+let isLoggingIn=false;
+
+async function checkAuth(){
+try{
+const res=await fetch('/api/me',{cache:'no-cache'});
+if(res.ok){
+const data=await res.json();
+currentUser=data.username;
+document.getElementById('loginModal').classList.remove('active');
+loadSuggestions();
+}else{
+document.getElementById('loginModal').classList.add('active');
+}
+}catch(e){
+console.error('Auth error:',e);
+document.getElementById('loginModal').classList.add('active');
+}
+}
+
+async function login(){
+if(isLoggingIn)return;
+isLoggingIn=true;
+document.getElementById('loginLoading').classList.add('active');
+
+try{
+const u=document.getElementById('loginUser').value.trim();
+const p=document.getElementById('loginPass').value;
+
+if(!u||!p){
+alert('Veuillez remplir tous les champs');
+return;
+}
+
+const res=await fetch('/api/login',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username:u,password:p})
+});
+
+if(res.ok){
+const data=await res.json();
+currentUser=data.username;
+document.getElementById('loginModal').classList.remove('active');
+document.getElementById('loginUser').value='';
+document.getElementById('loginPass').value='';
+await loadSuggestions();
+}else{
+alert('Identifiants incorrects. Veuillez reessayer.');
+}
+}catch(e){
+console.error('Login error:',e);
+alert('Erreur de connexion. Veuillez reessayer.');
+}finally{
+isLoggingIn=false;
+document.getElementById('loginLoading').classList.remove('active');
+}
+}
+
+async function register(){
+if(isLoggingIn)return;
+isLoggingIn=true;
+document.getElementById('loginLoading').classList.add('active');
+
+try{
+const u=document.getElementById('loginUser').value.trim();
+const p=document.getElementById('loginPass').value;
+
+if(!u||!p){
+alert('Veuillez remplir tous les champs');
+return;
+}
+
+const res=await fetch('/api/register',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username:u,password:p})
+});
+
+if(res.ok){
+const data=await res.json();
+currentUser=data.username;
+document.getElementById('loginModal').classList.remove('active');
+document.getElementById('loginUser').value='';
+document.getElementById('loginPass').value='';
+await loadSuggestions();
+}else{
+const err=await res.json();
+alert(err.message||'Erreur lors de la creation du compte');
+}
+}catch(e){
+console.error('Register error:',e);
+alert('Erreur lors de la creation du compte. Veuillez reessayer.');
+}finally{
+isLoggingIn=false;
+document.getElementById('loginLoading').classList.remove('active');
+}
+}
+
+async function logout(){
+await fetch('/api/logout',{method:'POST'});
+currentUser=null;
+document.getElementById('loginModal').classList.add('active');
+document.getElementById('loginUser').value='';
+document.getElementById('loginPass').value='';
+}
+
+async function loadSuggestions(){
+try{
+const res=await fetch('/api/films/suggestions');
+const suggestions=await res.json();
+renderFilms(suggestions,'suggestions');
+
+const allRes=await fetch('/api/films');
+const all=await allRes.json();
+renderFilms(all,'allFilms');
+}catch(e){
+console.error('Load error:',e);
+}
+}
+
+async function search(){
+const q=document.getElementById('searchInput').value;
+if(!q){
+document.getElementById('searchResults').innerHTML='';
+return;
+}
+try{
+const res=await fetch(`/api/films/search?q=${encodeURIComponent(q)}`);
+const films=await res.json();
+renderFilms(films,'searchResults');
+}catch(e){
+console.error('Search error:',e);
+}
+}
+
+async function loadFavoris(){
+try{
+const res=await fetch('/api/favoris');
+if(res.ok){
+const films=await res.json();
+if(films.length===0){
+document.getElementById('favorisList').innerHTML='';
+document.getElementById('noFavoris').style.display='block';
+}else{
+document.getElementById('noFavoris').style.display='none';
+renderFilms(films,'favorisList');
+}
+document.getElementById('favorisCount').innerText=films.length;
+}
+}catch(e){
+console.error('Favoris error:',e);
+}
+}
+
+function renderFilms(films,containerId){
+const container=document.getElementById(containerId);
+container.innerHTML='';
+films.forEach(f=>{
+const div=document.createElement('div');
+div.className='film-card';
+div.onclick=()=>showFilm(f.id);
+div.innerHTML=`<img src="${f.imageUrl}" alt="${f.titre}"><div class="film-info"><h3>${f.titre}</h3><p>${f.realisateur} (${f.annee})</p><p>${f.genre} <span class="star-rating">★ ${f.noteMoyenne}</span></p></div>`;
+container.appendChild(div);
+});
+}
+
+async function showFilm(id){
+try{
+const res=await fetch('/api/films');
+const films=await res.json();
+const film=films.find(f=>f.id===id);
+if(!film)return;
+
+const favRes=await fetch('/api/favoris');
+const favoris=favRes.ok?await favRes.json():[];
+const isFav=favoris.some(f=>f.id===id);
+
+document.getElementById('filmDetails').innerHTML=`<h2>${film.titre}</h2><p><strong>Realisateur:</strong> ${film.realisateur}</p><p><strong>Annee:</strong> ${film.annee}</p><p><strong>Genre:</strong> ${film.genre}</p><p><strong>Note:</strong> <span class="star-rating">★ ${film.noteMoyenne}/10</span></p><p style="margin-top:15px;line-height:1.6">${film.description}</p><div id="videoContainer"></div><div style="margin-top:25px;display:flex;flex-wrap:wrap;gap:10px;align-items:center"><button class="watch-btn" onclick="watchFilm(${id})">▶ Regarder maintenant</button><button class="fav-btn ${isFav?'active':''}" onclick="toggleFavori(${id})">${isFav?'Dans favoris':'Ajouter favoris'}</button><button class="download-btn" onclick="downloadFilm(${id})">Telecharger</button></div><div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px"><input type="number" id="rateInput" placeholder="Note (0-10)" min="0" max="10" style="width:120px;padding:10px;background:rgba(255,255,255,0.1);border:2px solid rgba(229,9,20,0.3);border-radius:8px;color:#fff"><button class="btn" onclick="rateFilm(${id})">Noter</button></div>`;
+document.getElementById('filmModal').classList.add('active');
+}catch(e){
+console.error('Show film error:',e);
+}
+}
+
+function closeFilmModal(){
+document.getElementById('filmModal').classList.remove('active');
+}
+
+async function rateFilm(id){
+const val=parseFloat(document.getElementById('rateInput').value);
+if(isNaN(val)||val<0||val>10)return alert('Veuillez entrer une note entre 0 et 10');
+try{
+const res=await fetch(`/api/films/${id}/rate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value:val})});
+if(res.ok){
+alert('Note enregistree avec succes !');
+closeFilmModal();
+loadSuggestions();
+}else{
+alert('Erreur lors de l enregistrement');
+}
+}catch(e){
+console.error('Rate error:',e);
+}
+}
+
+async function toggleFavori(id){
+try{
+const favRes=await fetch('/api/favoris');
+const favoris=favRes.ok?await favRes.json():[];
+const isFav=favoris.some(f=>f.id===id);
+
+if(isFav){
+await fetch(`/api/favoris/${id}`,{method:'DELETE'});
+alert('Retire des favoris');
+}else{
+await fetch(`/api/favoris/${id}`,{method:'POST'});
+alert('Ajoute aux favoris !');
+}
+closeFilmModal();
+loadFavoris();
+}catch(e){
+console.error('Favori error:',e);
+}
+}
+
+async function downloadFilm(id){
+window.location.href=`/api/films/${id}/download`;
+}
+
+async function watchFilm(id){
+const container=document.getElementById('videoContainer');
+// Bandes-annonces officielles via YouTube embed
+const trailers = {
+    1: 'YoHD9XEInc0', // Inception
+    2: 'sY1S34973zA', // Le Parrain
+    3: '34WIbmXkewU', // Intouchables
+    4: 'vKQi3bBA1y8', // The Matrix
+    5: 's7EdQ4FqbhY', // Pulp Fiction
+    6: 'bLvqoHBptjg', // Forrest Gump
+    7: '4sj1MT05lAA', // Le Roi Lion
+    8: 'kVrqfYjkTdQ', // Titanic
+    9: '5PSNL1qE6VY', // Avatar
+    10: 'zSWdZVtXT7E' // Interstellar
+};
+
+const filmTitles = {
+    1: 'Inception', 2: 'Le Parrain', 3: 'Intouchables', 4: 'The Matrix',
+    5: 'Pulp Fiction', 6: 'Forrest Gump', 7: 'Le Roi Lion', 
+    8: 'Titanic', 9: 'Avatar', 10: 'Interstellar'
+};
+
+const videoId = trailers[id] || trailers[4];
+const filmTitle = filmTitles[id] || 'Film';
+
+container.innerHTML=`
+<div style="margin:20px 0;">
+    <button onclick="closeVideo()" class="btn" style="background:linear-gradient(135deg,#ff6b6b,#ee5a5a);">
+        ✕ Fermer la bande-annonce
+    </button>
+</div>
+<div class="video-player" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
+    <iframe 
+        id="trailerFrame"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" 
+        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" 
+        title="Bande-annonce ${filmTitle}"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+    </iframe>
+</div>
+<p style="text-align:center;margin-top:15px;padding:15px;background:rgba(102,126,234,0.1);border-radius:10px;border:1px solid rgba(102,126,234,0.3)">
+    <strong style="color:#667eea">🎬 Bande-annonce officielle - ${filmTitle}</strong><br>
+    <span style="color:#999;font-size:14px">Trailer officiel en haute qualité</span>
+</p>`;
+container.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function closeVideo(){
+const container=document.getElementById('videoContainer');
+container.innerHTML='';
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showPage(page){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+document.getElementById(page).classList.add('active');
+const link=document.querySelector(`.nav a[onclick*="${page}"]`);
+if(link)link.classList.add('active');
+
+if(page==='recherche')search();
+if(page==='favoris')loadFavoris();
+if(page==='compte'){
+document.getElementById('username').innerText=currentUser;
+loadFavoris();
+}
+}
+
+checkAuth();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+FILM: Le Parrain
+Realisateur: Francis Ford Coppola
+Annee: 1972
+Genre: Crime
+
+Description:
+La saga d une famille mafieuse italienne a New York
+
+Ceci est un fichier de demonstration.
+Dans une vraie application, ce serait un fichier video.
